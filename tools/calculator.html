@@ -1,0 +1,588 @@
+<!--
+  CC0 1.0 Universell (CC0 1.0) Public Domain Dedication
+  https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+  Dieses Werk wurde von Elias Rickert (2025) in die Gemeinfreiheit überführt.
+  Soweit rechtlich möglich, verzichte ich auf alle Urheber- und verwandten Schutzrechte.
+
+  Du darfst den Code kopieren, verändern, verbreiten und ausführen –
+  auch zu kommerziellen Zwecken – ganz ohne Erlaubnis oder Bedingungen.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculator | ETME - TECH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --primary-color: #5e97f6;
+            --secondary-color: #53c88a;
+            --accent-color: #fdd663;
+            --text-color: #f5f5f5;
+            --text-light: #bdbdbd;
+            --bg-color: #121212;
+            --bg-secondary: #222222;
+            --border-color: #444444;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --transition: 0.15s;
+            --color-bg: #111;
+            --color-bg-alt: #181818;
+            --color-primary: #fff;
+            --color-text: #fff;
+            --color-text-muted: #bbb;
+            --color-footer: #181818;
+            --color-border: #222;
+            --color-btn: #fff;
+            --color-btn-hover: #bbb;
+            --shadow-btn: 0 2px 8px 0 rgba(255,255,255,0.04);
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+            font-size: 18px;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+        }
+        .navbar {
+            width: 100%;
+            background: var(--color-bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 48px;
+            height: 72px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-logo {
+            font-size: 2.1em;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            user-select: none;
+            transition: margin-right 0.2s;
+            z-index: 202;
+        }
+        .navbar-logo span {
+            color: var(--color-text-muted);
+            font-weight: 400;
+            font-size: 0.7em;
+            letter-spacing: 1px;
+        }
+        .navbar-links {
+            display: flex;
+            gap: 36px;
+            margin-left: 32px;
+            transition: left 0.3s;
+        }
+        .navbar-link {
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 1.08em;
+            font-weight: 500;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: color var(--transition), border-color var(--transition);
+            position: relative;
+        }
+        .navbar-link:hover, .navbar-link.active {
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+        }
+        .navbar-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            margin-left: auto;
+            z-index: 202;
+        }
+        .navbar-toggle span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            margin: 4px 0;
+            background: var(--color-primary);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        .sidebar-menu {
+            display: none;
+        }
+        @media (max-width: 900px) {
+            .navbar {
+                padding: 0 12px;
+            }
+            .navbar-logo {
+                font-size: 1.5em;
+                margin-right: 12px;
+            }
+            .navbar-links {
+                gap: 18px;
+                margin-left: 10px;
+            }
+        }
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 8px;
+                height: 56px;
+            }
+            .navbar-logo {
+                font-size: 1.1em;
+                margin-right: 0;
+                gap: 6px;
+            }
+            .navbar-links {
+                display: none;
+            }
+            .navbar-toggle {
+                display: flex;
+            }
+            .sidebar-menu {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                left: -240px;
+                width: 200px;
+                height: 100vh;
+                background: var(--color-bg-alt);
+                box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+                z-index: 300;
+                padding-top: 56px;
+                transition: left 0.3s;
+            }
+            .sidebar-menu.open {
+                left: 0;
+            }
+            .sidebar-link {
+                color: var(--color-primary);
+                text-decoration: none;
+                font-size: 1.1em;
+                font-weight: 500;
+                padding: 18px 24px;
+                border-bottom: 1px solid var(--color-border);
+                transition: background 0.2s, color 0.2s;
+            }
+            .sidebar-link:hover, .sidebar-link.active {
+                background: #222;
+                color: var(--color-btn-hover);
+            }
+            body.sidebar-open {
+                overflow: hidden;
+            }
+        }
+        .main-content {
+            max-width: 340px;
+            margin: 40px auto 0 auto;
+            padding: 24px 8px 0 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-content h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--color-primary);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .main-content p {
+            color: var(--color-text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        body {
+            --primary-color: #5e97f6;
+            --secondary-color: #53c88a;
+            --accent-color: #fdd663;
+            --text-color: #f5f5f5;
+            --text-light: #bdbdbd;
+            --bg-color: #121212;
+            --bg-secondary: #222222;
+            --border-color: #444444;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --transition: 0.15s;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h3 {
+            color: var(--accent-color);
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 2px 8px var(--shadow-color);
+        }
+        .calculator-display {
+            background: var(--bg-secondary);
+            color: var(--text-color);
+            font-size: 2.2rem;
+            border-radius: 0.7rem;
+            box-shadow: 0 2px 16px var(--shadow-color);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.2rem;
+            min-width: 260px;
+            text-align: right;
+            letter-spacing: 1px;
+            border: 1px solid var(--border-color);
+            user-select: all;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .calculator-history {
+            font-size: 1rem;
+            color: var(--text-light);
+            min-height: 1.2em;
+            margin-bottom: 0.2em;
+            word-break: break-all;
+            opacity: 0.85;
+        }
+        .calculator-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 60px);
+            grid-gap: 0.7rem;
+            background: var(--bg-secondary);
+            padding: 1.2rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 16px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            grid-template-rows: repeat(5, 60px);
+        }
+        .calc-btn {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 0.6rem;
+            border: 1.5px solid var(--border-color);
+            box-shadow: 0 1px 4px var(--shadow-color);
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 1rem 0;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+        .calc-btn:active {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 0 0 var(--shadow-color);
+        }
+        .calc-btn.operator {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .calc-btn.operator.equal {
+            background: var(--accent-color);
+            color: #222;
+            border-color: var(--accent-color);
+            font-size: 1.4rem;
+            font-weight: bold;
+            grid-column: 4;
+            grid-row: 5;
+        }
+        .calc-btn[value="0"] {
+            grid-column: span 2;
+        }
+        .calc-btn[value="."] {
+            grid-column: 3;
+            grid-row: 5;
+        }
+        .calc-btn.operator[value="+"] {
+            grid-column: 4;
+            grid-row: 4;
+        }
+        .calc-btn:hover, .calc-btn:focus {
+            filter: brightness(1.15);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        @media (max-width: 500px) {
+            .main-content {
+                max-width: 100vw;
+                padding: 8px 2px 0 2px;
+            }
+            .calculator-keys {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 0.5rem;
+            }
+            .calculator-display {
+                font-size: 1.3rem;
+                padding: 0.7rem 0.8rem;
+                min-width: 0;
+            }
+        }
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        .footer-links a {
+            color: var(--color-primary);
+            text-decoration: none;
+            margin: 0 18px;
+            font-weight: 600;
+            transition: color var(--transition);
+        }
+        .footer-links a:hover {
+            color: var(--color-btn-hover);
+            text-decoration: underline;
+        }
+        .footer-copy {
+            margin-top: 8px;
+            font-size: 0.98em;
+        }
+        footer {
+            width: 100%;
+            background: var(--color-footer);
+            color: var(--color-text-muted);
+            text-align: center;
+            padding: 38px 0 18px 0;
+            font-size: 1em;
+            letter-spacing: 0.5px;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-logo">ETME <span>- TECH</span></a>
+        <div class="navbar-toggle" id="navbar-toggle" aria-label="Open navigation" tabindex="0">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="navbar-links" id="navbar-links">
+            <a class="navbar-link active" href="../index.html">Home</a>
+            <a class="navbar-link" href="../index.html#toools">Tools</a>
+            <a class="navbar-link" href="../index.html#funs">Features</a>
+            <a class="navbar-link" href="../index.html#contact">Contact</a>
+        </div>
+        <nav class="sidebar-menu" id="sidebar-menu">
+            <a class="sidebar-link active" href="../index.html">Home</a>
+            <a class="sidebar-link" href="../index.html#toools">Tools</a>
+            <a class="sidebar-link" href="../index.html#funs">Features</a>
+            <a class="sidebar-link" href="../index.html#contact">Contact</a>
+        </nav>
+    </nav>
+    <div class="main-content">
+        <h1>Calculator</h1>
+        <p>A Calculator.</p>
+        <div class="calculator-display">
+            <div class="calculator-history"></div>
+            <div class="calculator-result">0</div>
+        </div>
+        <div class="calculator-keys">
+            <button class="calc-btn operator" value="clear">C</button>
+            <button class="calc-btn operator" value="backspace">⌫</button>
+            <button class="calc-btn operator" value="%">%</button>
+            <button class="calc-btn operator" value="/">÷</button>
+            <button class="calc-btn" value="7">7</button>
+            <button class="calc-btn" value="8">8</button>
+            <button class="calc-btn" value="9">9</button>
+            <button class="calc-btn operator" value="*">×</button>
+            <button class="calc-btn" value="4">4</button>
+            <button class="calc-btn" value="5">5</button>
+            <button class="calc-btn" value="6">6</button>
+            <button class="calc-btn operator" value="-">-</button>
+            <button class="calc-btn" value="1">1</button>
+            <button class="calc-btn" value="2">2</button>
+            <button class="calc-btn" value="3">3</button>
+            <button class="calc-btn operator" value="+">+</button>
+            <button class="calc-btn" value="0">0</button>
+            <button class="calc-btn" value=".">.</button>
+            <button class="calc-btn operator equal" value="=">=</button>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-links">
+            <a href="../impressum.html">Imprint</a> |
+            <a href="../datenschutz.html">Privacy Policy</a>
+        </div>
+        <div class="footer-copy">
+            &copy; 2025 ETME - TECH ( CC0 1.0 )
+        </div>
+    </footer>
+    <script>
+        const toggle = document.getElementById('navbar-toggle');
+        const sidebar = document.getElementById('sidebar-menu');
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-open');
+        }
+        function openSidebar() {
+            sidebar.classList.add('open');
+            document.body.classList.add('sidebar-open');
+        }
+        toggle.addEventListener('click', () => {
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+        toggle.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            }
+        });
+        Array.from(sidebar.getElementsByClassName('sidebar-link')).forEach(link => {
+            link.addEventListener('click', () => {
+                closeSidebar();
+            });
+        });
+        window.addEventListener('resize', () => {
+            closeSidebar();
+        });
+    </script>
+    <script>
+        const calculator = {
+            displayValue: '0',
+            firstOperand: null,
+            waitingForSecondOperand: false,
+            operator: null,
+            history: '',
+        };
+        const calculatorDisplay = document.querySelector('.calculator-result');
+        const calculatorHistory = document.querySelector('.calculator-history');
+        function updateDisplay() {
+            calculatorDisplay.textContent = calculator.displayValue;
+            calculatorHistory.textContent = calculator.history;
+        }
+        function resetCalculator() {
+            calculator.displayValue = '0';
+            calculator.firstOperand = null;
+            calculator.waitingForSecondOperand = false;
+            calculator.operator = null;
+            calculator.history = '';
+        }
+        function inputDigit(digit) {
+            const { displayValue, waitingForSecondOperand } = calculator;
+            if (waitingForSecondOperand === true) {
+                calculator.displayValue = digit;
+                calculator.waitingForSecondOperand = false;
+            } else {
+                calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
+            }
+        }
+        function inputDecimal(dot) {
+            if (calculator.waitingForSecondOperand === true) {
+                calculator.displayValue = '0.';
+                calculator.waitingForSecondOperand = false;
+                return;
+            }
+            if (!calculator.displayValue.includes(dot)) {
+                calculator.displayValue += dot;
+            }
+        }
+        function handleOperator(nextOperator) {
+            const { firstOperand, displayValue, operator, waitingForSecondOperand } = calculator;
+            const inputValue = parseFloat(displayValue);
+            if (operator && waitingForSecondOperand) {
+                calculator.operator = nextOperator;
+                calculator.history = calculator.history.replace(/[\+\-\*\/%]$/, nextOperator);
+                return;
+            }
+            if (firstOperand === null && !isNaN(inputValue)) {
+                calculator.firstOperand = inputValue;
+                calculator.history = displayValue + ' ' + nextOperator;
+            } else if (operator) {
+                const result = calculate(firstOperand, inputValue, operator);
+                calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
+                calculator.firstOperand = result;
+                calculator.history = calculator.displayValue + ' ' + nextOperator;
+            } else {
+                calculator.history = displayValue + ' ' + nextOperator;
+            }
+            calculator.waitingForSecondOperand = true;
+            calculator.operator = nextOperator;
+        }
+        function calculate(firstOperand, secondOperand, operator) {
+            if (operator === '+') {
+                return firstOperand + secondOperand;
+            } else if (operator === '-') {
+                return firstOperand - secondOperand;
+            } else if (operator === '*') {
+                return firstOperand * secondOperand;
+            } else if (operator === '/') {
+                return firstOperand / secondOperand;
+            } else if (operator === '%') {
+                return firstOperand % secondOperand;
+            }
+            return secondOperand;
+        }
+        function handleBackspace() {
+            if (calculator.displayValue.length > 1) {
+                calculator.displayValue = calculator.displayValue.slice(0, -1);
+            } else {
+                calculator.displayValue = '0';
+            }
+        }
+        document.querySelector('.calculator-keys').addEventListener('click', function(event) {
+            const { target } = event;
+            if (!target.matches('button')) {
+                return;
+            }
+            if (target.classList.contains('operator')) {
+                const operation = target.value;
+                if (operation === 'clear') {
+                    resetCalculator();
+                    updateDisplay();
+                    return;
+                }
+                if (operation === 'backspace') {
+                    handleBackspace();
+                    updateDisplay();
+                    return;
+                }
+                if (operation === '=') {
+                    if (calculator.operator && calculator.firstOperand !== null) {
+                        const inputValue = parseFloat(calculator.displayValue);
+                        const result = calculate(calculator.firstOperand, inputValue, calculator.operator);
+                        calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
+                        calculator.history = '';
+                        calculator.firstOperand = null;
+                        calculator.operator = null;
+                        calculator.waitingForSecondOperand = false;
+                        updateDisplay();
+                    }
+                    return;
+                }
+                handleOperator(operation);
+                updateDisplay();
+                return;
+            }
+            if (target.value === '.') {
+                inputDecimal(target.value);
+                updateDisplay();
+                return;
+            }
+            inputDigit(target.value);
+            updateDisplay();
+        });
+        updateDisplay();
+    </script>
+</body>
+</html>
+<!-- Teile dieses Codes wurden mit GitHub Copilot generiert -->
